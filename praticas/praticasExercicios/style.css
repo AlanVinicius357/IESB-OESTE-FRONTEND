@@ -1,0 +1,261 @@
+/* fonts */
+@import url('https://fonts.googleapis.com/css2?family=Bitcount+Prop+Double+Ink:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cascadia+Mono:ital,wght@0,200..700;1,200..700&display=swap');
+
+
+
+body{
+    background-color: #999797;
+    
+}
+
+
+.logo img{
+    height: 40px;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background-color: #111;
+  color: white;
+}
+.search-box {
+  display: flex;
+  align-items: center;
+  background: #2a2a2a;
+  border-radius: 6px;
+  padding: 3px;
+  width: 300px;
+}
+
+.search-box input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 8px;
+  outline: none;
+}
+
+.search-btn {
+  background: #1e1e1e;
+  border: 2px solid orange;
+  color: orange;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.search-btn:hover {
+  background: orange;
+  color: black;
+}
+.carrinho {
+  position: relative;
+  font-size: 24px;
+  cursor: pointer;
+}
+.carrinho-numero {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background: red;
+  color: white;
+  font-size: 12px;
+  border-radius: 50%;
+  padding: 3px 6px;
+}
+
+
+.hero {
+  height: 400px;
+  background-image: url("./imagens/Copilot_20260301_193524.png"); /* sua imagem */
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: white;
+}
+
+.hero-content {
+  background: rgba(0,0,0,0.5); /* escurece fundo para destacar texto */
+  padding: 30px;
+  border-radius: 10px;
+}
+
+.hero h1 {
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+.hero p {
+  font-size: 18px;
+}
+
+.slogan{
+  font-family: "Bitcount Prop Double Ink", system-ui;
+}
+
+
+.products {
+  padding: 30px;
+  background: transparent;
+  color: #eee;
+  font-family: "Cascadia Mono", sans-serif;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px 30px;
+  max-width: 960px;
+  margin: 0 auto;
+  align-items: start;
+  font-family: "Cascadia Mono", sans-serif;
+}
+
+.product-card {
+  background: #1a1a1a;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  height: 350px; /* altura fixa para todos os cards */
+  box-sizing: border-box;
+  
+}
+
+.product-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: contain;
+  background: #000;
+  padding: 5px;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.product-card h3 {
+  margin: 15px 0 10px;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  background-color: #2a2a2a;
+  padding: 2px;
+  border-radius: 6px;
+  font-family: "Cascadia Mono", sans-serif;
+}
+
+.price {
+  margin: 0 0 15px;
+  flex-shrink: 0;
+  font-family: "Cascadia Mono", sans-serif;
+}
+
+.old-price {
+  text-decoration: line-through;
+  color: #ff3b3b;
+  margin-right: 8px;
+  padding: 2px 6px;
+  background: #3a0b0b;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  
+}
+
+.new-price {
+  color: #39b54a;
+  font-weight: bold;
+  padding: 2px 8px;
+  background: #163d17;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.product-card button {
+  font-family: "Cascadia Mono", sans-serif;
+  background: #002855;
+  color: white;
+  border: none;
+  padding: 12px 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  width: 100%;
+  margin-top: auto; /* empurra o botão para o rodapé */
+  transition: background-color 0.3s ease;
+}
+
+.product-card button:hover {
+  background: #004aad;
+}
+
+ .footer {
+    background-color: #1c1c1c; /* fundo escuro */
+    color: #f0f0f0;           /* texto claro */
+    padding: 20px 40px;
+    font-family: "Cascadia Mono", sans-serif;
+  }
+
+  .footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+
+  .logo-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .footer-logo {
+    height: 50px; /* ajuste conforme seu logo */
+  }
+
+  .slogan {
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .social-section {
+    display: flex;
+    gap: 15px;
+  }
+
+  .social-icon {
+    text-decoration: none;
+    color: #f0f0f0;
+    font-weight: bold;
+    transition: color 0.3s;
+  }
+
+  .social-icon:hover {
+    color: #1db954; /* cor de destaque ao passar o mouse */
+  }
+
+  .footer-bottom {
+    text-align: center;
+    font-size: 14px;
+    border-top: 1px solid #333;
+    padding-top: 10px;
+  }
+  
+
+  @media (max-width: 600px) {
+    .footer-content {
+      flex-direction: column;
+      gap: 15px;
+    }
+    .social-section {
+      justify-content: center;
+    }
+  }
