@@ -71,7 +71,7 @@ body{
 
 .hero {
   height: 400px;
-  background-image: url("./imagens/Copilot_20260301_193524.png"); /* sua imagem */
+  background-image: url("./imagens/Copilot_20260301_193524.png"); 
   background-size: cover;
   background-position: center;
   display: flex;
@@ -82,7 +82,7 @@ body{
 }
 
 .hero-content {
-  background: rgba(0,0,0,0.5); /* escurece fundo para destacar texto */
+  background: rgba(0,0,0,0.5);
   padding: 30px;
   border-radius: 10px;
 }
@@ -127,7 +127,7 @@ body{
   text-align: center;
   display: flex;
   flex-direction: column;
-  height: 350px; /* altura fixa para todos os cards */
+  height: 350px; 
   box-sizing: border-box;
   
 }
@@ -188,7 +188,7 @@ body{
   cursor: pointer;
   font-weight: bold;
   width: 100%;
-  margin-top: auto; /* empurra o botão para o rodapé */
+  margin-top: auto; 
   transition: background-color 0.3s ease;
 }
 
@@ -197,8 +197,8 @@ body{
 }
 
  .footer {
-    background-color: #1c1c1c; /* fundo escuro */
-    color: #f0f0f0;           /* texto claro */
+    background-color: #1c1c1c; 
+    color: #f0f0f0;          
     padding: 20px 40px;
     font-family: "Cascadia Mono", sans-serif;
   }
@@ -218,7 +218,7 @@ body{
   }
 
   .footer-logo {
-    height: 50px; /* ajuste conforme seu logo */
+    height: 50px; 
   }
 
   .slogan {
@@ -239,7 +239,7 @@ body{
   }
 
   .social-icon:hover {
-    color: #1db954; /* cor de destaque ao passar o mouse */
+    color: #1db954; 
   }
 
   .footer-bottom {
@@ -247,6 +247,15 @@ body{
     font-size: 14px;
     border-top: 1px solid #333;
     padding-top: 10px;
+  }
+
+  .A-Email{
+    text-decoration: none;
+    color: white;
+  }
+  .A-Email:hover{
+    text-decoration: underline;
+    color: blue;
   }
   
 
