@@ -1,0 +1,9 @@
+/* src/styles/global.css */
+body {
+  font-family: sans-serif;
+  font-size: 30px;
+}
+
+h1 {
+  color: var(--primary); /* Consumindo a variável pink criada no theme.css */
+}
