@@ -2,12 +2,18 @@
 import './styles/theme.css';
 // 2º: Importamos os estilos globais
 import './styles/global.css';
+//importação do heading
+import { Heading } from './components/Heading';
+// Importando o ícone
+import { Timer } from 'lucide-react'; 
 
 export function App() {
   return (
-    <>
-      <h1>Olá, Mundo!</h1>
-      <p>Testando o CSS Global.</p>
-    </>
+    <Heading>
+      Histórico
+      <button>
+        <Timer /> {/* Renderizando o ícone dentro do botão */}
+      </button>
+    </Heading>
   );
 }
