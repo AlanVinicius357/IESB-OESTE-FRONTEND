@@ -1,5 +1,5 @@
 
-import styles from './Heading.module.css';
+import styles from './styles.module.css';
 
 
 import React from 'react'; 
