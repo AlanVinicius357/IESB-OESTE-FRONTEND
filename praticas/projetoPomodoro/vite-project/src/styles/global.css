@@ -26,11 +26,22 @@ body {
   width: 100%;
 }
 
-.container {
-  max-width: 98rem; /* Equivale a 980px */
-  margin: 0 auto; /* Centraliza horizontalmente */
+/* ... resto do seu código global (reset, body, html) ... */
+
+/* Centralizando e empilhando os itens do formulário */
+.form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2.4rem;
 }
 
-.content {
-  padding: 3.2rem; /* Adiciona espaço interno (32px) */
+/* O mesmo alinhamento para o conteúdo interno de cada "linha" */
+.formRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2.4rem;
 }

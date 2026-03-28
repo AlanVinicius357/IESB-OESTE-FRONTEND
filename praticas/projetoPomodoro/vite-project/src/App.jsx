@@ -1,19 +1,54 @@
-// 1º: Importamos as variáveis (o tema)
+import { Container } from './components/Container';
+import { Logo } from './components/Logo';
+import { Menu } from './components/Menu';
+import { CountDown } from './components/CountDown';
+import { DefaultInput } from './components/DefaultInput';
+
 import './styles/theme.css';
-// 2º: Importamos os estilos globais
 import './styles/global.css';
-//importação do heading
-import { Heading } from './components/Heading';
-// Importando o ícone
-import { Timer } from 'lucide-react'; 
 
 export function App() {
   return (
-    <Heading>
-      Histórico
-      <button>
-        <Timer /> {/* Renderizando o ícone dentro do botão */}
-      </button>
-    </Heading>
+    <>
+      <Container>
+        <Logo />
+      </Container>
+      <Container>
+        <Menu />
+      </Container>
+      <Container>
+        <CountDown />
+      </Container>
+
+      <Container>
+        <form className='form' action=''>
+          {
+  /* Dentro do seu formulário... */
+}
+<div className='formRow'>
+  <DefaultInput
+    labelText='task'
+    id='meuInput'
+    type='text'
+    placeholder='Digite algo'
+    /* Tente adicionar a palavra "disabled" (sem aspas) aqui para ver o estado desativado! */
+  />
+</div>;
+
+          <div className='formRow'>
+            <p>Lorem ipsum dolor sit amet.</p>
+          </div>
+
+          <div className='formRow'>
+            <p>Ciclos</p>
+            <p>0 0 0 0 0 0 0</p>
+          </div>
+
+          <div className='formRow'>
+            <button>Enviar</button>
+          </div>
+        </form>
+      </Container>
+    </>
   );
 }
