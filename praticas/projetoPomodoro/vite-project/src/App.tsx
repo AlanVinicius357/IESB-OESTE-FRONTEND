@@ -1,8 +1,12 @@
 import { Container } from './components/Container';
-import { Logo } from './components/Logo';
+import { Logo } from './components/logo';
 import { Menu } from './components/Menu';
 import { CountDown } from './components/CountDown';
 import { DefaultInput } from './components/DefaultInput';
+import { Cycles } from './components/Cycles';
+import { DefaultButton } from './components/DefaultButton'
+import { PlayCircleIcon } from 'lucide-react';
+import { Footer } from './components/Footer'; // <-- Importado!
 
 import './styles/theme.css';
 import './styles/global.css';
@@ -22,32 +26,33 @@ export function App() {
 
       <Container>
         <form className='form' action=''>
-          {
-  /* Dentro do seu formulário... */
-}
-<div className='formRow'>
-  <DefaultInput
-    labelText='task'
-    id='meuInput'
-    type='text'
-    placeholder='Digite algo'
-    /* Tente adicionar a palavra "disabled" (sem aspas) aqui para ver o estado desativado! */
-  />
-</div>;
+          <div className='formRow'>
+            <DefaultInput
+              labelText='task'
+              id='meuInput'
+              type='text'
+              placeholder='Digite algo'
+            />
+          </div>
 
           <div className='formRow'>
             <p>Lorem ipsum dolor sit amet.</p>
           </div>
 
           <div className='formRow'>
-            <p>Ciclos</p>
-            <p>0 0 0 0 0 0 0</p>
+            <Cycles />
           </div>
 
           <div className='formRow'>
-            <button>Enviar</button>
+            {/* Mantivemos apenas o botão principal de Play */}
+            <DefaultButton icon={<PlayCircleIcon />} />
           </div>
         </form>
+      </Container>
+
+      {/* Nosso novo rodapé entra aqui, no seu próprio Container! */}
+      <Container>
+        <Footer />
       </Container>
     </>
   );
