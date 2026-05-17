@@ -8,73 +8,62 @@ import styles from './styles.module.css';
 import { useTaskContext } from '../../contexts/TaskContext/useTaskContext';
 import { formatDate } from '../../utils/formatDate';
 import { getTaskStatus } from '../../utils/getTaskStatus';
-import { sortTasks, type SortTasksOptions } from '../../utils/sortTasks';
+import { sortTasks } from '../../utils/sortTasks';
 import { useEffect, useState } from 'react';
 import { TaskActionTypes } from '../../contexts/TaskContext/taskActions';
 import { showMessage } from '../../adapters/showMessage';
 
+// Criamos uma interface mais simples, guardando apenas os critérios de ordenação
+interface SortCriteria {
+  field: 'name' | 'duration' | 'startDate';
+  direction: 'asc' | 'desc';
+}
+
 export function History() {
   const { state, dispatch } = useTaskContext();
-  const [confirmClearHistory, setConfirmClearHistory] = useState(false);
   const hasTasks = state.tasks.length > 0;
 
-  const [sortTasksOptions, setSortTaskOptions] = useState<SortTasksOptions>(
-    () => {
-      return {
-        tasks: sortTasks({ tasks: state.tasks }),
-        field: 'startDate',
-        direction: 'desc',
-      };
-    },
-  );
+  // 1. O estado agora guarda APENAS as configurações de ordenação, sem duplicar a lista de tarefas
+  const [sortCriteria, setSortCriteria] = useState<SortCriteria>({
+    field: 'startDate',
+    direction: 'desc',
+  });
 
-  useEffect(() => {
-    setSortTaskOptions(prevState => ({
-      ...prevState,
-      tasks: sortTasks({
-        tasks: state.tasks,
-        direction: prevState.direction,
-        field: prevState.field,
-      }),
-    }));
-  }, [state.tasks]);
+  // 2. Calculamos as tarefas ordenadas diretamente na renderização.
+  // Sem useEffect, sem renders em cascata, performance máxima!
+  const orderedTasks = sortTasks({
+    tasks: state.tasks,
+    field: sortCriteria.field,
+    direction: sortCriteria.direction,
+  });
 
+  // Define o título da página
   useEffect(() => {
     document.title = 'Histórico - Chronos Pomodoro';
   }, []);
 
-  useEffect(() => {
-    if (!confirmClearHistory) return;
-
-    setConfirmClearHistory(false);
-
-    dispatch({ type: TaskActionTypes.RESET_STATE });
-  }, [confirmClearHistory, dispatch]);
-
+  // Limpa mensagens pendentes ao desmontar o componente
   useEffect(() => {
     return () => {
       showMessage.dismiss();
     };
   }, []);
 
-  function handleSortTasks({ field }: Pick<SortTasksOptions, 'field'>) {
-    const newDirection = sortTasksOptions.direction === 'desc' ? 'asc' : 'desc';
-
-    setSortTaskOptions({
-      tasks: sortTasks({
-        direction: newDirection,
-        tasks: sortTasksOptions.tasks,
-        field,
-      }),
-      direction: newDirection,
+  // Altera os critérios de ordenação ao clicar no topo da tabela
+  function handleSortTasks(field: SortCriteria['field']) {
+    setSortCriteria(prev => ({
       field,
-    });
+      direction: prev.field === field && prev.direction === 'desc' ? 'asc' : 'desc',
+    }));
   }
 
+  // Executa a limpeza do histórico direto no callback do evento do botão
   function handleResetHistory() {
     showMessage.dismiss();
     showMessage.confirm('Tem certeza?', confirmation => {
-      setConfirmClearHistory(confirmation);
+      if (confirmation) {
+        dispatch({ type: TaskActionTypes.RESET_STATE });
+      }
     });
   }
 
@@ -104,19 +93,19 @@ export function History() {
               <thead>
                 <tr>
                   <th
-                    onClick={() => handleSortTasks({ field: 'name' })}
+                    onClick={() => handleSortTasks('name')}
                     className={styles.thSort}
                   >
                     Tarefa ↕
                   </th>
                   <th
-                    onClick={() => handleSortTasks({ field: 'duration' })}
+                    onClick={() => handleSortTasks('duration')}
                     className={styles.thSort}
                   >
                     Duração ↕
                   </th>
                   <th
-                    onClick={() => handleSortTasks({ field: 'startDate' })}
+                    onClick={() => handleSortTasks('startDate')}
                     className={styles.thSort}
                   >
                     Data ↕
@@ -127,7 +116,8 @@ export function History() {
               </thead>
 
               <tbody>
-                {sortTasksOptions.tasks.map(task => {
+                {/* 3. Aqui nós mapeamos a variável calculada em tempo de execução */}
+                {orderedTasks.map(task => {
                   const taskTypeDictionary = {
                     workTime: 'Foco',
                     shortBreakTime: 'Descanso curto',

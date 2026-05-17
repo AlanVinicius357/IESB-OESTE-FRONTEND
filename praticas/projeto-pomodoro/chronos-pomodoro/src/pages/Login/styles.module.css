@@ -1,0 +1,130 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #0d141c; /* Fundo idêntico ao do seu app */
+  font-family: sans-serif;
+  padding: 20px;
+}
+
+.card {
+  background-color: #151f2b; /* Card um pouco mais claro que o fundo */
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.mainTitle {
+  color: #10b981; /* Verde Chronos principal */
+  font-size: 2rem;
+  margin-bottom: 30px;
+  font-weight: bold;
+}
+
+.title {
+  color: #e2e8f0;
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+.infoText {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 25px;
+}
+
+.feedback {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  text-align: left;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inputGroup label {
+  color: #10b981; /* Labels em verde igual ao mockup */
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.inputGroup input {
+  background-color: #0d141c;
+  border: 1px solid #1e293b;
+  color: #ffffff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.inputGroup input:focus {
+  border-color: #10b981; /* Borda verde ao focar */
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.inputGroup input::placeholder {
+  color: #475569;
+}
+
+.submitButton {
+  background-color: #10b981; /* Botão verde preenchido */
+  color: #0d141c; /* Texto escuro para dar contraste */
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  margin-top: 10px;
+}
+
+.submitButton:hover {
+  background-color: #059669; /* Verde levemente mais escuro no hover */
+}
+
+.submitButton:active {
+  transform: scale(0.98);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 25px;
+}
+
+.linkButton {
+  background: none;
+  border: none;
+  color: #10b981;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.linkButton:hover {
+  color: #34d399; /* Tom de verde mais claro ao passar o mouse */
+}
