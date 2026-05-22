@@ -9,6 +9,9 @@ import { useEffect, useRef } from 'react';
 import { showMessage } from '../../adapters/showMessage';
 import { TaskActionTypes } from '../../contexts/TaskContext/taskActions';
 
+const USER_ID = 'b0fd63dd-a332-4826-b8dd-fe76873cfd93';
+const API_URL = 'http://localhost:3333';
+
 export function Settings() {
   const { state, dispatch } = useTaskContext();
   const workTimeInput = useRef<HTMLInputElement>(null);
@@ -19,13 +22,12 @@ export function Settings() {
     document.title = 'Configurações - Chronos Pomodoro';
   }, []);
 
-
-  function handleSaveSettings(e: React.FormEvent<HTMLFormElement>) {
+  // 🌟 AGORA CONECTADO COM O BACKEND
+  async function handleSaveSettings(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     showMessage.dismiss();
 
     const formErrors = [];
-
     const workTime = Number(workTimeInput.current?.value);
     const shortBreakTime = Number(shortBreakTimeInput.current?.value);
     const longBreakTime = Number(longBreakTimeInput.current?.value);
@@ -33,35 +35,50 @@ export function Settings() {
     if (isNaN(workTime) || isNaN(shortBreakTime) || isNaN(longBreakTime)) {
       formErrors.push('Digite apenas números para TODOS os campos');
     }
-
     if (workTime < 1 || workTime > 99) {
       formErrors.push('Digite valores entre 1 e 99 para foco');
     }
-
     if (shortBreakTime < 1 || shortBreakTime > 30) {
       formErrors.push('Digite valores entre 1 e 30 para descanso curto');
     }
-
     if (longBreakTime < 1 || longBreakTime > 60) {
       formErrors.push('Digite valores entre 1 e 60 para descanso longo');
     }
 
     if (formErrors.length > 0) {
-      formErrors.forEach(error => {
-        showMessage.error(error);
-      });
+      formErrors.forEach(error => showMessage.error(error));
       return;
     }
 
-    dispatch({
-      type: TaskActionTypes.CHANGE_SETTINGS,
-      payload: {
-        workTime,
-        shortBreakTime,
-        longBreakTime,
-      },
-    });
-    showMessage.success('Configurações salvas');
+    try {
+      // Envia os tempos alterados para persistirem no banco MySQL via API
+      const response = await fetch(`${API_URL}/settings/${USER_ID}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          focusTime: workTime,
+          shortBreak: shortBreakTime,
+          longBreak: longBreakTime,
+        }),
+      });
+
+      if (response.ok) {
+        const updatedData = await response.json();
+        
+        // Atualiza o estado global na tela do React
+        dispatch({
+          type: TaskActionTypes.CHANGE_SETTINGS,
+          payload: updatedData,
+        });
+        
+        showMessage.success('Configurações salvas com sucesso no banco! 💾');
+      } else {
+        showMessage.error('Não foi possível salvar as configurações no servidor.');
+      }
+    } catch (err) {
+      console.error(err);
+      showMessage.error('Erro de rede. Verifique se a API está ligada.');
+    }
   }
 
   return (
@@ -72,13 +89,12 @@ export function Settings() {
 
       <Container>
         <p style={{ textAlign: 'center' }}>
-          Modifique as configurações para tempo de foco, descanso curso e
-          descanso longo.
+          Modifique as configurações para tempo de foco, descanso curto e descanso longo.
         </p>
       </Container>
 
       <Container>
-        <form onSubmit={handleSaveSettings} action='' className='form'>
+        <form onSubmit={handleSaveSettings} className='form'>
           <div className='formRow'>
             <DefaultInput
               id='workTime'

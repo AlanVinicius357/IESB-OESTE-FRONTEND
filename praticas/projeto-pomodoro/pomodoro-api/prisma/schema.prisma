@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tasks    Task[]
+  sessions Session[]
+  settings Settings? // Relacionamento 1 para 1 com as configurações
+
+  @@map("users")
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  // Alterado para String para aceitar: 'PENDING', 'COMPLETED', ou 'INTERRUPTED'
+  status      String   @default("PENDING") 
+  createdAt   DateTime @default(now()) @map("created_at")
+  userId      String   @map("user_id")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("tasks")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  type      String   // 'FOCUS', 'SHORT_BREAK', 'LONG_BREAK'
+  duration  Int      // Tempo em minutos
+  createdAt DateTime @default(now()) @map("created_at")
+  userId    String   @map("user_id")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// 🌟 NOVO MODELO EXIGIDO PELA RUBRICA
+model Settings {
+  id            String @id @default(uuid())
+  focusTime     Int    @default(25) @map("focus_time")
+  shortBreak    Int    @default(5)  @map("short_break")
+  longBreak     Int    @default(15) @map("long_break")
+  userId        String @unique @map("user_id")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("settings")
+}
