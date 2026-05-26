@@ -13,43 +13,41 @@ import { useEffect, useState } from 'react';
 import { TaskActionTypes } from '../../contexts/TaskContext/taskActions';
 import { showMessage } from '../../adapters/showMessage';
 
-// Criamos uma interface mais simples, guardando apenas os critérios de ordenação
+const USER_ID = 'b0fd63dd-a332-4826-b8dd-fe76873cfd93';
+const API_URL = 'http://localhost:3333';
+
 interface SortCriteria {
   field: 'name' | 'duration' | 'startDate';
   direction: 'asc' | 'desc';
 }
 
+type TaskType = 'workTime' | 'shortBreakTime' | 'longBreakTime';
+
 export function History() {
   const { state, dispatch } = useTaskContext();
   const hasTasks = state.tasks.length > 0;
 
-  // 1. O estado agora guarda APENAS as configurações de ordenação, sem duplicar a lista de tarefas
   const [sortCriteria, setSortCriteria] = useState<SortCriteria>({
     field: 'startDate',
     direction: 'desc',
   });
 
-  // 2. Calculamos as tarefas ordenadas diretamente na renderização.
-  // Sem useEffect, sem renders em cascata, performance máxima!
   const orderedTasks = sortTasks({
     tasks: state.tasks,
     field: sortCriteria.field,
     direction: sortCriteria.direction,
   });
 
-  // Define o título da página
   useEffect(() => {
     document.title = 'Histórico - Chronos Pomodoro';
   }, []);
 
-  // Limpa mensagens pendentes ao desmontar o componente
   useEffect(() => {
     return () => {
       showMessage.dismiss();
     };
   }, []);
 
-  // Altera os critérios de ordenação ao clicar no topo da tabela
   function handleSortTasks(field: SortCriteria['field']) {
     setSortCriteria(prev => ({
       field,
@@ -57,12 +55,28 @@ export function History() {
     }));
   }
 
-  // Executa a limpeza do histórico direto no callback do evento do botão
+  // 🌟 AGORA CONECTADO COM A API (Atendendo à Rubrica de limpar histórico)
   function handleResetHistory() {
     showMessage.dismiss();
-    showMessage.confirm('Tem certeza?', confirmation => {
+    showMessage.confirm('Tem certeza que deseja limpar todo o histórico?', async (confirmation) => {
       if (confirmation) {
-        dispatch({ type: TaskActionTypes.RESET_STATE });
+        try {
+          // Dispara a rota DELETE que criamos na API para limpar o MySQL
+          const response = await fetch(`${API_URL}/sessions/${USER_ID}/clear`, {
+            method: 'DELETE',
+          });
+
+          if (response.ok) {
+            // Se limpou no banco de dados, limpa também o estado local na tela do usuário
+            dispatch({ type: TaskActionTypes.RESET_STATE });
+            showMessage.success('Histórico limpo com sucesso no banco de dados! 🗑️');
+          } else {
+            showMessage.error('Não foi possível limpar o histórico no servidor.');
+          }
+        } catch (err) {
+          console.error('Erro ao limpar histórico na API:', err);
+          showMessage.error('Erro de rede. Verifique se o servidor está ligado.');
+        }
       }
     });
   }
@@ -92,22 +106,13 @@ export function History() {
             <table>
               <thead>
                 <tr>
-                  <th
-                    onClick={() => handleSortTasks('name')}
-                    className={styles.thSort}
-                  >
+                  <th onClick={() => handleSortTasks('name')} className={styles.thSort}>
                     Tarefa ↕
                   </th>
-                  <th
-                    onClick={() => handleSortTasks('duration')}
-                    className={styles.thSort}
-                  >
+                  <th onClick={() => handleSortTasks('duration')} className={styles.thSort}>
                     Duração ↕
                   </th>
-                  <th
-                    onClick={() => handleSortTasks('startDate')}
-                    className={styles.thSort}
-                  >
+                  <th onClick={() => handleSortTasks('startDate')} className={styles.thSort}>
                     Data ↕
                   </th>
                   <th>Status</th>
@@ -116,9 +121,8 @@ export function History() {
               </thead>
 
               <tbody>
-                {/* 3. Aqui nós mapeamos a variável calculada em tempo de execução */}
                 {orderedTasks.map(task => {
-                  const taskTypeDictionary = {
+                  const taskTypeDictionary: Record<TaskType, string> = {
                     workTime: 'Foco',
                     shortBreakTime: 'Descanso curto',
                     longBreakTime: 'Descanso longo',
@@ -129,7 +133,7 @@ export function History() {
                       <td>{task.duration}min</td>
                       <td>{formatDate(task.startDate)}</td>
                       <td>{getTaskStatus(task, state.activeTask)}</td>
-                      <td>{taskTypeDictionary[task.type]}</td>
+                      <td>{taskTypeDictionary[task.type as TaskType] || 'Foco'}</td>
                     </tr>
                   );
                 })}
