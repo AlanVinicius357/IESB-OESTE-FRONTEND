@@ -3,49 +3,68 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #0d141c; /* Fundo idêntico ao do seu app */
+
+  /* Fundo principal do app */
+  background-color: var(--gray-900);
+
   font-family: sans-serif;
   padding: 20px;
 }
 
 .card {
-  background-color: #151f2b; /* Card um pouco mais claro que o fundo */
+  /* Card seguindo padrão do projeto */
+  background-color: var(--gray-800);
+
   padding: 40px 30px;
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+
+  border: 1px solid var(--gray-700);
+
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+
   width: 100%;
   max-width: 400px;
   text-align: center;
 }
 
 .mainTitle {
-  color: #10b981; /* Verde Chronos principal */
+  /* Cor principal do tema */
+  color: var(--primary);
+
   font-size: 2rem;
   margin-bottom: 30px;
   font-weight: bold;
 }
 
 .title {
-  color: #e2e8f0;
+  /* Texto principal */
+  color: var(--text-default);
+
   font-size: 1.5rem;
   margin-bottom: 15px;
 }
 
 .infoText {
-  color: #94a3b8;
+  /* Texto secundário */
+  color: var(--text-muted);
+
   font-size: 0.95rem;
   line-height: 1.5;
   margin-bottom: 25px;
 }
 
 .feedback {
-  background-color: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  background-color: rgba(37, 99, 235, 0.1);
+
+  color: var(--primary);
+
   padding: 12px;
   border-radius: 6px;
   margin-bottom: 20px;
+
   font-size: 0.9rem;
-  border: 1px solid rgba(16, 185, 129, 0.2);
+
+  border: 1px solid var(--primary-light);
 }
 
 .form {
@@ -62,46 +81,69 @@
 }
 
 .inputGroup label {
-  color: #10b981; /* Labels em verde igual ao mockup */
+  color: var(--primary);
+
   font-size: 0.9rem;
   font-weight: 500;
 }
 
 .inputGroup input {
-  background-color: #0d141c;
-  border: 1px solid #1e293b;
-  color: #ffffff;
+  /* Campo com padrão do tema */
+
+  background-color: var(--gray-900);
+
+  border: 1px solid var(--gray-700);
+
+  color: var(--text-default);
+
   padding: 12px 16px;
+
   border-radius: 8px;
+
   font-size: 1rem;
+
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .inputGroup input:focus {
-  border-color: #10b981; /* Borda verde ao focar */
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+  border-color: var(--primary);
+
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
 }
 
 .inputGroup input::placeholder {
-  color: #475569;
+  color: var(--text-muted);
 }
 
 .submitButton {
-  background-color: #10b981; /* Botão verde preenchido */
-  color: #0d141c; /* Texto escuro para dar contraste */
+  background-color: var(--primary);
+
+  color: var(--text-over-primary);
+
   border: none;
+
   padding: 14px;
+
   border-radius: 8px;
+
   font-size: 1rem;
   font-weight: bold;
+
   cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
+
+  transition:
+    background-color 0.2s,
+    transform 0.1s;
+
   margin-top: 10px;
 }
 
 .submitButton:hover {
-  background-color: #059669; /* Verde levemente mais escuro no hover */
+  background-color: var(--primary-dark);
 }
 
 .submitButton:active {
@@ -112,19 +154,26 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+
   margin-top: 25px;
 }
 
 .linkButton {
   background: none;
+
   border: none;
-  color: #10b981;
+
+  color: var(--link-color);
+
   font-size: 0.9rem;
+
   cursor: pointer;
+
   text-decoration: underline;
+
   transition: color 0.2s;
 }
 
 .linkButton:hover {
-  color: #34d399; /* Tom de verde mais claro ao passar o mouse */
+  color: var(--link-hover);
 }

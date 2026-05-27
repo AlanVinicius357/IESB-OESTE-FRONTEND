@@ -12,3 +12,9 @@ export const initialTaskState: TaskStateModel = {
     longBreakTime: 15,
   },
 };
+
+
+const configMapeado = initialTaskState.config as Record<string, unknown>;
+configMapeado.focusTime = 25;
+configMapeado.shortBreak = 5;
+configMapeado.longBreak = 15;
