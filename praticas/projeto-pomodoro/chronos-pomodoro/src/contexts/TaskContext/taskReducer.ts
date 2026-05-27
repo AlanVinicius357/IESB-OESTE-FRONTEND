@@ -112,12 +112,20 @@ export function taskReducer(
       };
     }
     case TaskActionTypes.CHANGE_SETTINGS: {
+      // Usamos Record para mapear dinamicamente o que vem do formulário sem disparar o ESLint any
+      const payloadMapeado = action.payload as Record<string, unknown>;
+
+      // CORREÇÃO: Lê focusTime/shortBreak se existirem, senão tenta ler o formato antigo
+      const focusTime = Number(payloadMapeado.focusTime ?? payloadMapeado.workTime ?? 25);
+      const shortBreak = Number(payloadMapeado.shortBreak ?? payloadMapeado.shortBreakTime ?? 5);
+      const longBreak = Number(payloadMapeado.longBreak ?? payloadMapeado.longBreakTime ?? 15);
+
       return { 
         ...state, 
         config: { 
-          workTime: action.payload.workTime, 
-          shortBreakTime: action.payload.shortBreakTime,
-          longBreakTime: action.payload.longBreakTime
+          workTime: focusTime, 
+          shortBreakTime: shortBreak,
+          longBreakTime: longBreak
         } 
       };
     }

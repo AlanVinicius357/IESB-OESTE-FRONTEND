@@ -60,7 +60,6 @@ export function TaskContextProvider({ children }: TaskContextProviderProps) {
     loadInitialDataFromAPI();
   }, []);
 
-  // 🌟 SOLUÇÃO DA TIPAGEM: Chamamos worker.onmessage(...) como a função que ela é nativamente no seu projeto
   useEffect(() => {
     worker.onmessage(async (e: MessageEvent) => {
       const countDownSeconds = e.data;
@@ -74,7 +73,13 @@ export function TaskContextProvider({ children }: TaskContextProviderProps) {
 
         if (currentState.activeTask) {
           try {
-            const fallbackDuration = currentState.config?.workTime || currentState.activeTask.duration || 25;
+            // SOLUÇÃO ESLINT: Criamos um mapeamento seguro usando Record para aceitar focusTime e title sem usar explicit any
+            const configMapeado = currentState.config as Record<string, unknown> | null;
+            const taskMapeada = currentState.activeTask as Record<string, unknown>;
+
+            const focusTime = typeof configMapeado?.focusTime === 'number' ? configMapeado.focusTime : 25;
+            const duration = typeof taskMapeada.duration === 'number' ? taskMapeada.duration : 25;
+            const fallbackDuration = focusTime || duration;
 
             await fetch(`${API_URL}/tasks/${currentState.activeTask.id}/complete`, { method: 'PATCH' });
             
@@ -82,8 +87,8 @@ export function TaskContextProvider({ children }: TaskContextProviderProps) {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                name: currentState.activeTask.name,
-                type: 'workTime',
+                name: taskMapeada.name || taskMapeada.title || 'Tarefa',
+                type: 'focusTime', 
                 duration: fallbackDuration,
                 userId: USER_ID,
               }),

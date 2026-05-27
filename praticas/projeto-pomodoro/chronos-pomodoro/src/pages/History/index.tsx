@@ -13,7 +13,6 @@ import { useEffect, useState } from 'react';
 import { TaskActionTypes } from '../../contexts/TaskContext/taskActions';
 import { showMessage } from '../../adapters/showMessage';
 
-const USER_ID = 'b0fd63dd-a332-4826-b8dd-fe76873cfd93';
 const API_URL = 'http://localhost:3333';
 
 interface SortCriteria {
@@ -55,27 +54,23 @@ export function History() {
     }));
   }
 
-  // 🌟 AGORA CONECTADO COM A API (Atendendo à Rubrica de limpar histórico)
   function handleResetHistory() {
     showMessage.dismiss();
     showMessage.confirm('Tem certeza que deseja limpar todo o histórico?', async (confirmation) => {
       if (confirmation) {
         try {
-          // Dispara a rota DELETE que criamos na API para limpar o MySQL
-          const response = await fetch(`${API_URL}/sessions/${USER_ID}/clear`, {
-            method: 'DELETE',
-          });
+          // Deleta cada tarefa pelo id dinâmico dela vindo do estado
+          const deletePromises = state.tasks.map(task =>
+            fetch(`${API_URL}/tasks/${task.id}`, { method: 'DELETE' })
+          );
 
-          if (response.ok) {
-            // Se limpou no banco de dados, limpa também o estado local na tela do usuário
-            dispatch({ type: TaskActionTypes.RESET_STATE });
-            showMessage.success('Histórico limpo com sucesso no banco de dados! 🗑️');
-          } else {
-            showMessage.error('Não foi possível limpar o histórico no servidor.');
-          }
+          await Promise.all(deletePromises);
+
+          dispatch({ type: TaskActionTypes.RESET_STATE });
+          showMessage.success('Histórico limpo com sucesso no banco de dados! 🗑️');
         } catch (err) {
           console.error('Erro ao limpar histórico na API:', err);
-          showMessage.error('Erro de rede. Verifique se o servidor está ligado.');
+          showMessage.error('Não foi possível limpar o histórico no servidor.');
         }
       }
     });
