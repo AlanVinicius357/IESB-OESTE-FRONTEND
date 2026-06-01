@@ -9,7 +9,6 @@ import { useEffect, useRef } from 'react';
 import { showMessage } from '../../adapters/showMessage';
 import { TaskActionTypes } from '../../contexts/TaskContext/taskActions';
 
-const USER_ID = 'b0fd63dd-a332-4826-b8dd-fe76873cfd93';
 const API_URL = 'http://localhost:3333';
 
 export function Settings() {
@@ -22,7 +21,7 @@ export function Settings() {
     document.title = 'Configurações - Chronos Pomodoro';
   }, []);
 
-  // 🌟 AGORA CONECTADO COM O BACKEND
+  // 🌟 CONECTADO COM O BACKEND PADRÃO DO PROFESSOR
   async function handleSaveSettings(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     showMessage.dismiss();
@@ -51,14 +50,15 @@ export function Settings() {
     }
 
     try {
-      // Envia os tempos alterados para persistirem no banco MySQL via API
-      const response = await fetch(`${API_URL}/settings/${USER_ID}`, {
+      // Ajustado para fazer o PUT /settings exato do roteiro
+      const response = await fetch(`${API_URL}/settings`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        // Chaves mapeadas corretamente: workTime, shortBreakTime, longBreakTime
         body: JSON.stringify({
-          focusTime: workTime,
-          shortBreak: shortBreakTime,
-          longBreak: longBreakTime,
+          workTime: workTime,
+          shortBreakTime: shortBreakTime,
+          longBreakTime: longBreakTime,
         }),
       });
 
