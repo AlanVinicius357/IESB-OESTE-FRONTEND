@@ -19,9 +19,11 @@ app.get('/health', (req, res) => {
 app.use(userRoutes);
 app.use(taskRoutes);
 app.use(sessionRoutes);
-app.use(settingsRoutes); // <-- Ativando as rotas de configurações
+app.use(settingsRoutes); 
 
 const PORT = process.env.PORT || 3333;
-app.listen(PORT, () => {
+
+
+app.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`🚀 API running on http://localhost:${PORT}`);
 });
