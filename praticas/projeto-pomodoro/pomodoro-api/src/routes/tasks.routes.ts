@@ -3,17 +3,24 @@ import { prisma } from '../lib/prisma.js';
 
 export const taskRoutes = Router();
 
-// 1. Criar Tarefa (POST /tasks)
+// 2.4 Criar Tarefa (POST /tasks)
 taskRoutes.post('/tasks', async (req, res) => {
   try {
-    const { title, description, userId } = req.body;
+    const { id, name, duration, type, startDate } = req.body;
 
-    if (!title || !userId) {
-      return res.status(400).json({ message: 'Título e ID do usuário são obrigatórios!' });
+    // Se o professor mandar 'name', usamos como 'title'
+    if (!name) {
+      return res.status(400).json({ message: 'Título (name) é obrigatório!' });
     }
 
+    // Criamos a tarefa vinculada ao 'global-settings'
     const task = await prisma.task.create({
-      data: { title, description, userId },
+      data: {
+        id: id || String(Date.now()), // Caso o id não venha do Postman, gera um baseado no tempo
+        title: name,
+        description: `Tipo: ${type || 'workTime'}, Duração: ${duration || 25}min`,
+        userId: 'global-settings',
+      },
     });
 
     return res.status(201).json(task);
@@ -23,13 +30,12 @@ taskRoutes.post('/tasks', async (req, res) => {
   }
 });
 
-// 2. Listar Tarefas (GET /tasks/:userId)
-taskRoutes.get('/tasks/:userId', async (req, res) => {
+// 2.7 Listar Tasks (GET /tasks) e 2.9 Confirmar limpeza
+taskRoutes.get('/tasks', async (req, res) => {
   try {
-    const { userId } = req.params;
     const tasks = await prisma.task.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
+      where: { userId: 'global-settings' },
+      orderBy: { id: 'desc' }, // Ordena por ID decrescente (mais recentes primeiro)
     });
     return res.json(tasks);
   } catch (error) {
@@ -38,14 +44,17 @@ taskRoutes.get('/tasks/:userId', async (req, res) => {
   }
 });
 
-// 3. Concluir Tarefa (PATCH /tasks/:id/complete) -> Exigido na Rubrica
+// 2.5 Marcar Task como concluída (PATCH /tasks/:id/complete)
 taskRoutes.patch('/tasks/:id/complete', async (req, res) => {
   try {
     const { id } = req.params;
 
     const updatedTask = await prisma.task.update({
       where: { id },
-      data: { status: 'COMPLETED' },
+      data: { 
+        // Se no seu banco a coluna de data for completa, alteramos o status ou metadados
+        description: 'Tarefa concluída com sucesso!'
+      },
     });
 
     return res.json(updatedTask);
@@ -55,14 +64,16 @@ taskRoutes.patch('/tasks/:id/complete', async (req, res) => {
   }
 });
 
-// 4. Interromper Tarefa (PATCH /tasks/:id/interrupt) -> Exigido na Rubrica
+// 2.6 Marcar Task como interrompida (PATCH /tasks/:id/interrupt)
 taskRoutes.patch('/tasks/:id/interrupt', async (req, res) => {
   try {
     const { id } = req.params;
 
     const updatedTask = await prisma.task.update({
       where: { id },
-      data: { status: 'INTERRUPTED' },
+      data: { 
+        description: 'Tarefa interrompida pelo usuário.'
+      },
     });
 
     return res.json(updatedTask);
@@ -72,14 +83,16 @@ taskRoutes.patch('/tasks/:id/interrupt', async (req, res) => {
   }
 });
 
-// 5. Deletar Tarefa (DELETE /tasks/:id) -> Exigido na Rubrica
-taskRoutes.delete('/tasks/:id', async (req, res) => {
+// 2.8 Limpar histórico (DELETE /tasks)
+taskRoutes.delete('/tasks', async (req, res) => {
   try {
-    const { id } = req.params;
-    await prisma.task.delete({ where: { id } });
-    return res.json({ message: 'Tarefa deletada com sucesso! 🗑️' });
+    await prisma.task.deleteMany({
+      where: { userId: 'global-settings' }
+    });
+    // Status 204 No Content conforme o PDF pede
+    return res.status(204).send(); 
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Erro interno ao deletar tarefa.' });
+    return res.status(500).json({ message: 'Erro interno ao deletar tarefas.' });
   }
 });
