@@ -3,22 +3,29 @@ import { useAuthContext } from '../../contexts/AuthContext/useAuthContext';
 import styles from './styles.module.css';
 
 export default function Login() {
-  const { dispatch } = useAuthContext();
+  // 🌟 Pegando as funções reais conectadas ao Back-end do Docker
+  const { signIn, signUp } = useAuthContext();
   
-  // Estados dos inputs controlados
+  // Estados dos inputs comuns
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   
-  // Estados de feedback e controle de tela simulada (Modo de Visualização)
+  // 🌟 Estado exclusivo para o formulário de cadastro
+  const [name, setName] = useState('');
+
+  // Estados de feedback e controle de tela
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [viewMode, setViewMode] = useState<'login' | 'register' | 'recovery'>('login');
 
   const emailInputRef = useRef<HTMLInputElement>(null);
+  const registerNameRef = useRef<HTMLInputElement>(null);
 
-  // UX: Foca automaticamente no campo de usuário ao carregar a tela de login
+  // UX: Foca automaticamente no campo principal ao mudar de tela
   useEffect(() => {
     if (viewMode === 'login' && emailInputRef.current) {
       emailInputRef.current.focus();
+    } else if (viewMode === 'register' && registerNameRef.current) {
+      registerNameRef.current.focus();
     }
   }, [viewMode]);
 
@@ -30,12 +37,8 @@ export default function Login() {
     }
   }, [feedbackMessage]);
 
-  // Credenciais mockadas (fixas no front-end conforme o enunciado)
-  const MOCK_USER = "aluno@chronos.com";
-  const MOCK_PASSWORD = "123";
-
-  // Tipagem moderna do evento do formulário que resolve os avisos do TypeScript
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  // 🔑 ENVIO DO LOGIN (Conectado à API)
+  const handleLoginSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -43,27 +46,116 @@ export default function Login() {
       return;
     }
 
-    // Validação simulada
-    if (email === MOCK_USER && password === MOCK_PASSWORD) {
+    setFeedbackMessage('⏳ Validando credenciais...');
+    
+    // Chama a função real da API
+    const result = await signIn(email, password);
+
+    if (result.success) {
       setFeedbackMessage('🎉 Login efetuado com sucesso! Entrando...');
-      
-      // Pequeno delay para o usuário ler o feedback de sucesso antes de mudar de tela
-      setTimeout(() => {
-        dispatch({ type: 'LOGIN', payload: { email } });
-      }, 1500);
     } else {
-      setFeedbackMessage('❌ Usuário ou senha incorretos.');
+      setFeedbackMessage(`❌ ${result.error || 'Usuário ou senha incorretos.'}`);
     }
   };
 
-  // Renderização Condicional: Tela de Cadastro Simulada
+  // 📝 ENVIO DO CADASTRO REAL (Conectado à API)
+  const handleRegisterSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!name || !email || !password) {
+      setFeedbackMessage('⚠️ Por favor, preencha todos os campos.');
+      return;
+    }
+
+    if (password.length < 4) {
+      setFeedbackMessage('⚠️ A senha deve ter pelo menos 4 caracteres.');
+      return;
+    }
+
+    setFeedbackMessage('⏳ Criando sua conta...');
+
+    // Chama a função real da API
+    const result = await signUp(name, email, password);
+
+    if (result.success) {
+      setFeedbackMessage('🎉 Conta criada com sucesso! Faça seu login.');
+      // Limpa os campos e joga o usuário de volta para a tela de login
+      setName('');
+      setPassword('');
+      setViewMode('login');
+    } else {
+      setFeedbackMessage(`❌ ${result.error || 'Erro ao criar conta.'}`);
+    }
+  };
+
+  // 🔄 Função para resetar estados ao mudar de modo
+  const changeMode = (mode: 'login' | 'register' | 'recovery') => {
+    setFeedbackMessage('');
+    setEmail('');
+    setPassword('');
+    setName('');
+    setViewMode(mode);
+  };
+
+  // ==========================================
+  // RENDER: TELA DE CADASTRO REAL
+  // ==========================================
   if (viewMode === 'register') {
     return (
       <div className={styles.container}>
         <div className={styles.card}>
           <h2 className={styles.title}>Criar Conta</h2>
-          <p className={styles.infoText}>Fluxo de cadastro ainda será implementado em etapas futuras.</p>
-          <button className={styles.linkButton} onClick={() => setViewMode('login')}>
+          
+          {feedbackMessage && (
+            <div className={styles.feedback} aria-live="polite">
+              {feedbackMessage}
+            </div>
+          )}
+
+          <form onSubmit={handleRegisterSubmit} className={styles.form}>
+            <div className={styles.inputGroup}>
+              <label htmlFor="reg-name">Nome Completo:</label>
+              <input
+                id="reg-name"
+                type="text"
+                ref={registerNameRef}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Seu nome"
+                required
+              />
+            </div>
+
+            <div className={styles.inputGroup}>
+              <label htmlFor="reg-email">E-mail:</label>
+              <input
+                id="reg-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="seu-email@exemplo.com"
+                required
+              />
+            </div>
+
+            <div className={styles.inputGroup}>
+              <label htmlFor="reg-password">Senha:</label>
+              <input
+                id="reg-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Mínimo 4 caracteres"
+                required
+              />
+            </div>
+
+            <button type="submit" className={styles.submitButton}>
+              Cadastrar
+            </button>
+          </form>
+
+          <button className={styles.linkButton} onClick={() => changeMode('login')}>
             Voltar para o Login
           </button>
         </div>
@@ -71,14 +163,16 @@ export default function Login() {
     );
   }
 
-  // Renderização Condicional: Tela de Recuperação Simulada
+  // ==========================================
+  // RENDER: TELA DE RECUPERAÇÃO SIMULADA
+  // ==========================================
   if (viewMode === 'recovery') {
     return (
       <div className={styles.container}>
         <div className={styles.card}>
           <h2 className={styles.title}>Recuperar Senha</h2>
-          <p className={styles.infoText}>Fluxo de recuperação de senha ainda será implementado em etapas futuras.</p>
-          <button className={styles.linkButton} onClick={() => setViewMode('login')}>
+          <p className={styles.infoText}>Fluxo de recuperação de senha será integrado via rotas de e-mail da API.</p>
+          <button className={styles.linkButton} onClick={() => changeMode('login')}>
             Voltar para o Login
           </button>
         </div>
@@ -86,19 +180,21 @@ export default function Login() {
     );
   }
 
+  // ==========================================
+  // RENDER: TELA DE LOGIN REAL
+  // ==========================================
   return (
     <div className={styles.container}>
       <div className={styles.card}>
         <h1 className={styles.mainTitle}>Chronos Pomodoro</h1>
         
-        {/* Feedback visual básico para acessibilidade e UX */}
         {feedbackMessage && (
           <div className={styles.feedback} aria-live="polite">
             {feedbackMessage}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className={styles.form}>
+        <form onSubmit={handleLoginSubmit} className={styles.form}>
           <div className={styles.inputGroup}>
             <label htmlFor="email">E-mail ou Usuário:</label>
             <input
@@ -130,10 +226,10 @@ export default function Login() {
         </form>
 
         <div className={styles.actions}>
-          <button className={styles.linkButton} onClick={() => setViewMode('register')}>
+          <button className={styles.linkButton} onClick={() => changeMode('register')}>
             Não tem conta? Cadastre-se
           </button>
-          <button className={styles.linkButton} onClick={() => setViewMode('recovery')}>
+          <button className={styles.linkButton} onClick={() => changeMode('recovery')}>
             Esqueci minha senha
           </button>
         </div>

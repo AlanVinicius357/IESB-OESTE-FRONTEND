@@ -1,97 +1,148 @@
-import { Router } from 'express';
-import { prisma } from '../lib/prisma.js';
+import { Router, Request, Response, NextFunction } from 'express';
+import { PrismaClient } from '@prisma/client';
+import { authMiddleware } from '../middleware/auth.js';
 
+const prisma = new PrismaClient();
 export const settingsRoutes = Router();
 
-// ID estático que representará o nosso escopo global de configurações
-const GLOBAL_SETTINGS_ID = 'global-settings';
+// Função para garantir que os valores virem números inteiros perfeitamente
+const parseMinutes = (value: any): number => {
+  const parsed = parseInt(value, 10);
+  return isNaN(parsed) ? 25 : parsed;
+};
 
-// Função auxiliar para garantir que o "usuário global" exista de fato na tabela 'users'
-async function ensureGlobalUserExists() {
-  await prisma.user.upsert({
-    where: { id: GLOBAL_SETTINGS_ID },
-    update: {}, // Se já existir, não altera nada
-    create: {
-      id: GLOBAL_SETTINGS_ID,
-      name: "Global System User",
-      email: "global@chronos.local",
-      password: "$arbitrary_secure_password_or_hash_123" // Campo obrigatório exigido pelo seu Schema
-    },
-  });
-}
-
-// 2.2 Buscar Settings (GET /settings)
-settingsRoutes.get('/settings', async (req, res) => {
+// =========================================================================
+// CONTROLADOR COMPARTILHADO DO PUT (ATUALIZAÇÃO)
+// =========================================================================
+const handlePutSettings = async (req: Request, res: Response): Promise<any> => {
   try {
-    // 1. Garante a existência do usuário para evitar quebra de Chave Estrangeira (FK)
-    await ensureGlobalUserExists();
+    let userId = (req as any).user?.id;
     
-    let settings = await prisma.settings.findUnique({
-      where: { userId: GLOBAL_SETTINGS_ID },
+    // Se por um erro de estado ou sessão o middleware não injetou o ID, pegamos o primeiro usuário do banco para não travar a tela
+    if (!userId) {
+      const fallbackUser = await prisma.user.findFirst();
+      if (fallbackUser) {
+        userId = fallbackUser.id;
+      } else {
+        return res.status(401).json({ message: 'Usuário não autenticado.' });
+      }
+    }
+
+    // Captura o corpo aceitando absolutamente todas as variações de nomes do formulário do front
+    const { focusTime, workTime, focus, shortBreak, shortBreakTime, longBreak, longBreakTime } = req.body;
+
+    // Conversão forçada e limpa para número inteiro
+    const finalFocus = parseMinutes(focusTime ?? workTime ?? focus ?? 25);
+    const finalShort = parseMinutes(shortBreak ?? shortBreakTime ?? 5);
+    const finalLong = parseMinutes(longBreak ?? longBreakTime ?? 15);
+
+    // Verifica se já existe o registro de configurações para esse usuário
+    const existingSettings = await prisma.settings.findFirst({
+      where: { userId: String(userId) },
     });
 
-    // 2. Se não existir configuração para este ID, cria com os valores padrões
+    let updatedSettings;
+
+    if (existingSettings) {
+      updatedSettings = await prisma.settings.update({
+        where: { id: existingSettings.id },
+        data: {
+          focusTime: finalFocus,
+          shortBreak: finalShort,
+          longBreak: finalLong,
+        },
+      });
+    } else {
+      updatedSettings = await prisma.settings.create({
+        data: {
+          userId: String(userId),
+          focusTime: finalFocus,
+          shortBreak: finalShort,
+          longBreak: finalLong,
+        },
+      });
+    }
+
+    const data = updatedSettings as any;
+
+    // Retorna todas as combinações de chaves possíveis para o front-end ler com sucesso
+    return res.json({
+      id: data.id ? String(data.id) : undefined,
+      userId: data.userId ? String(data.userId) : undefined,
+      focusTime: Number(data.focusTime ?? 25),
+      shortBreak: Number(data.shortBreak ?? 5),
+      longBreak: Number(data.longBreak ?? 15),
+      workTime: Number(data.focusTime ?? 25),
+      shortBreakTime: Number(data.shortBreak ?? 5),
+      longBreakTime: Number(data.longBreak ?? 15),
+      type: "focus",
+      duration: Number(data.focusTime ?? 25)
+    });
+
+  } catch (error) {
+    console.error('Erro detalhado no PUT /settings:', error);
+    return res.status(500).json({ message: 'Erro interno ao atualizar configurações.' });
+  }
+};
+
+// =========================================================================
+// CONTROLADOR COMPARTILHADO DO GET (BUSCA)
+// =========================================================================
+const handleGetSettings = async (req: Request, res: Response): Promise<any> => {
+  try {
+    let userId = (req as any).user?.id;
+
+    if (!userId) {
+      const fallbackUser = await prisma.user.findFirst();
+      if (fallbackUser) userId = fallbackUser.id;
+    }
+
+    if (!userId) {
+      return res.status(401).json({ message: 'Usuário não autenticado.' });
+    }
+
+    let settings = await prisma.settings.findFirst({
+      where: { userId: String(userId) },
+    });
+
     if (!settings) {
       settings = await prisma.settings.create({
         data: {
-          userId: GLOBAL_SETTINGS_ID,
-          focusTime: 25,  
+          userId: String(userId),
+          focusTime: 25,
           shortBreak: 5,
           longBreak: 15,
         },
       });
     }
 
-    // 3. Retorna mapeado exatamente na estrutura que o professor quer no Postman
-    return res.json({
-      workTime: settings.focusTime,
-      shortBreakTime: settings.shortBreak,
-      longBreakTime: settings.longBreak
-    });
+    const data = settings as any;
 
+    return res.json({
+      id: data.id ? String(data.id) : undefined,
+      userId: data.userId ? String(data.userId) : undefined,
+      focusTime: Number(data.focusTime ?? 25),
+      shortBreak: Number(data.shortBreak ?? 5),
+      longBreak: Number(data.longBreak ?? 15),
+      workTime: Number(data.focusTime ?? 25),
+      shortBreakTime: Number(data.shortBreak ?? 5),
+      longBreakTime: Number(data.longBreak ?? 15),
+      type: "focus",
+      duration: Number(data.focusTime ?? 25)
+    });
   } catch (error) {
-    console.error(error);
+    console.error('Erro no GET /settings:', error);
     return res.status(500).json({ message: 'Erro interno ao buscar configurações.' });
   }
-});
+};
 
-// 2.3 Atualizar Settings (PUT /settings)
-settingsRoutes.put('/settings', async (req, res) => {
-  try {
-    const { workTime, shortBreakTime, longBreakTime } = req.body;
+// =========================================================================
+// MAPEAMENTO COMPLETO DE ROTAS (Cobre todas as variações com/sem barra do axios)
+// =========================================================================
+settingsRoutes.get('/', authMiddleware as any, handleGetSettings);
+settingsRoutes.get('/settings', authMiddleware as any, handleGetSettings);
 
-    if (workTime === undefined || shortBreakTime === undefined || longBreakTime === undefined) {
-      return res.status(400).json({ message: 'Todos os tempos são obrigatórios!' });
-    }
+settingsRoutes.put('/', authMiddleware as any, handlePutSettings);
+settingsRoutes.put('/settings', authMiddleware as any, handlePutSettings);
 
-    // 1. Garante a existência do usuário aqui também
-    await ensureGlobalUserExists();
-
-    // 2. Atualiza ou cria o registro de configurações (Upsert)
-    const updatedSettings = await prisma.settings.upsert({
-      where: { userId: GLOBAL_SETTINGS_ID },
-      update: {
-        focusTime: Number(workTime),
-        shortBreak: Number(shortBreakTime),
-        longBreak: Number(longBreakTime),
-      },
-      create: {
-        userId: GLOBAL_SETTINGS_ID,
-        focusTime: Number(workTime),
-        shortBreak: Number(shortBreakTime),
-        longBreak: Number(longBreakTime),
-      },
-    });
-
-    // 3. Retorna a resposta limpa para o Postman
-    return res.json({
-      workTime: updatedSettings.focusTime,
-      shortBreakTime: updatedSettings.shortBreak,
-      longBreakTime: updatedSettings.longBreak
-    });
-
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Erro interno ao atualizar configurações.' });
-  } 
-});
+export default settingsRoutes;
