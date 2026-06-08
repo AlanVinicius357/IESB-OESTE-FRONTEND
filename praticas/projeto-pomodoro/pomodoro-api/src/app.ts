@@ -1,39 +1,29 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import { prisma } from './lib/prisma';
+
+// 🔄 Importações com extensão .js exigidas pelo modulo node16/nodenext
+import { userRoutes } from './routes/user.routes.js';
+import { taskRoutes } from './routes/tasks.routes.js';
+import { sessionRoutes } from './routes/session.routes.js';
+import { settingsRoutes } from './routes/settings.routes.js';
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// Rota de Health Check (Critério de conclusão do Encontro 1)
+// 🔓 Rota de Teste Global / Health Check
 app.get('/health', (req, res) => {
-  res.status(200).json({ ok: true });
+  res.json({ ok: true, database: 'connected' });
 });
 
-// Rotas provisórias para o Encontro 1 (ajustaremos no Encontro 2)
-app.get('/settings', async (req, res) => {
-  try {
-    // Procura as configurações no banco
-    let settings = await prisma.settings.findUnique({
-      where: { id: 1 },
-    });
+// 🔓 Rotas Públicas Principais (Usuários e Sessões de Login)
+app.use(userRoutes);    
+app.use(sessionRoutes); 
 
-    // Se o banco estiver vazio, retorna os valores padrão (requisito do roteiro)
-    if (!settings) {
-      return res.json({
-        id: 1,
-        workTime: 25,
-        shortBreakTime: 5,
-        longBreakTime: 15,
-      });
-    }
-
-    return res.json(settings);
-  } catch (error) {
-    return res.status(500).json({ error: 'Erro ao buscar configurações' });
-  }
-});
+// 🔒 Rotas Oficiais do Projeto (Deixando os arquivos de rotas controlarem tudo)
+app.use(taskRoutes);
+app.use(settingsRoutes); 
 
 export { app };
