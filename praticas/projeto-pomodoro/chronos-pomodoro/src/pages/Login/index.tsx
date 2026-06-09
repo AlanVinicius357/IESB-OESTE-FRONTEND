@@ -122,6 +122,7 @@ export default function Login() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Seu nome"
+                autoComplete="off"
                 required
               />
             </div>
@@ -134,6 +135,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu-email@exemplo.com"
+                autoComplete="off"
                 required
               />
             </div>
@@ -146,6 +148,7 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Mínimo 4 caracteres"
+                autoComplete="new-password"
                 required
               />
             </div>
@@ -204,6 +207,7 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Ex: aluno@chronos.com"
+              autoComplete="off"
               required
             />
           </div>
@@ -216,6 +220,7 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Digite sua senha"
+              autoComplete="current-password"
               required
             />
           </div>
