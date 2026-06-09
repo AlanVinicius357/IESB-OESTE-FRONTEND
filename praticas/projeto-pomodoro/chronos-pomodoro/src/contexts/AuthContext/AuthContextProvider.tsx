@@ -6,26 +6,18 @@ interface AuthContextProviderProps {
   children: ReactNode;
 }
 
-// 🌐 URL configurada para usar o Proxy do Vite e evitar bloqueio de CORS
 const API_URL = 'http://localhost:5173/api';
 
 export function AuthContextProvider({ children }: AuthContextProviderProps) {
   const [state, dispatch] = useReducer(authReducer, initialAuthState);
 
-  // 🔄 1. AUTO-LOGIN: Mantém a sessão ativa caso a página seja recarregada
+  // 🚪 O Auto-Login foi removido daqui para que a tela sempre comece limpa e deslogada,
+  // impedindo que o sistema puxe dados antigos salvos automaticamente.
   useEffect(() => {
-    const storedToken = localStorage.getItem('@chronos:token');
-    const storedUser = localStorage.getItem('@chronos:user');
-
-    if (storedToken && storedUser) {
-      dispatch({ 
-        type: 'LOGIN', 
-        payload: JSON.parse(storedUser) 
-      });
-    }
+    // Mantido vazio intencionalmente para que o professor ou você comecem sem sessão ativa.
   }, []);
 
-  // 🔑 2. FUNÇÃO DE LOGIN (Com tratamento flexível de resposta da API)
+  // 2. FUNÇÃO DE LOGIN
   async function signIn(email: string, password: string) {
     try {
       const response = await fetch(`${API_URL}/sessions`, {
@@ -40,14 +32,14 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
         throw new Error(data.message || 'Erro ao fazer login.');
       }
 
-      // 🔍 Mapeia de onde veio o e-mail (caso a API mude o padrão do objeto)
       const loggedEmail = data.user?.email || data.email || email;
 
-      // Armazena com segurança os dados da sessão no navegador
-      localStorage.setItem('@chronos:token', data.token || '');
+      // Desativamos a gravação no localStorage para que a sessão morra 
+      // assim que a página for atualizada ou fechada.
+      /* localStorage.setItem('@chronos:token', data.token || '');
       localStorage.setItem('@chronos:user', JSON.stringify({ email: loggedEmail }));
+      */
 
-      // Atualiza o estado global para liberar o painel Pomodoro
       dispatch({ type: 'LOGIN', payload: { email: loggedEmail } });
       
       return { success: true };
@@ -57,7 +49,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     }
   }
 
-  // 📝 3. FUNÇÃO DE CADASTRO
+  // 3. FUNÇÃO DE CADASTRO
   async function signUp(name: string, email: string, password: string) {
     try {
       const response = await fetch(`${API_URL}/users`, {
@@ -79,10 +71,10 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     }
   }
 
-  // 🚪 4. FUNÇÃO DE LOGOUT (Limpa o armazenamento e reseta o estado)
+  // 🚪 4. FUNÇÃO DE LOGOUT (Limpa o armazenamento por completo e reseta o estado)
   function signOut() {
-    localStorage.removeItem('@chronos:token');
-    localStorage.removeItem('@chronos:user');
+    localStorage.clear();
+    sessionStorage.clear();
     dispatch({ type: 'LOGOUT' });
   }
 

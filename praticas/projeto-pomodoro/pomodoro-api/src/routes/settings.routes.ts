@@ -5,20 +5,17 @@ import { authMiddleware } from '../middleware/auth.js';
 const prisma = new PrismaClient();
 export const settingsRoutes = Router();
 
-// Função para garantir que os valores virem números inteiros perfeitamente
 const parseMinutes = (value: any): number => {
   const parsed = parseInt(value, 10);
   return isNaN(parsed) ? 25 : parsed;
 };
 
-// =========================================================================
-// CONTROLADOR COMPARTILHADO DO PUT (ATUALIZAÇÃO)
-// =========================================================================
+
 const handlePutSettings = async (req: Request, res: Response): Promise<any> => {
   try {
     let userId = (req as any).user?.id;
     
-    // Se por um erro de estado ou sessão o middleware não injetou o ID, pegamos o primeiro usuário do banco para não travar a tela
+  
     if (!userId) {
       const fallbackUser = await prisma.user.findFirst();
       if (fallbackUser) {
@@ -28,15 +25,15 @@ const handlePutSettings = async (req: Request, res: Response): Promise<any> => {
       }
     }
 
-    // Captura o corpo aceitando absolutamente todas as variações de nomes do formulário do front
+  
     const { focusTime, workTime, focus, shortBreak, shortBreakTime, longBreak, longBreakTime } = req.body;
 
-    // Conversão forçada e limpa para número inteiro
+   
     const finalFocus = parseMinutes(focusTime ?? workTime ?? focus ?? 25);
     const finalShort = parseMinutes(shortBreak ?? shortBreakTime ?? 5);
     const finalLong = parseMinutes(longBreak ?? longBreakTime ?? 15);
 
-    // Verifica se já existe o registro de configurações para esse usuário
+
     const existingSettings = await prisma.settings.findFirst({
       where: { userId: String(userId) },
     });
@@ -65,7 +62,6 @@ const handlePutSettings = async (req: Request, res: Response): Promise<any> => {
 
     const data = updatedSettings as any;
 
-    // Retorna todas as combinações de chaves possíveis para o front-end ler com sucesso
     return res.json({
       id: data.id ? String(data.id) : undefined,
       userId: data.userId ? String(data.userId) : undefined,
@@ -85,9 +81,6 @@ const handlePutSettings = async (req: Request, res: Response): Promise<any> => {
   }
 };
 
-// =========================================================================
-// CONTROLADOR COMPARTILHADO DO GET (BUSCA)
-// =========================================================================
 const handleGetSettings = async (req: Request, res: Response): Promise<any> => {
   try {
     let userId = (req as any).user?.id;
@@ -136,9 +129,6 @@ const handleGetSettings = async (req: Request, res: Response): Promise<any> => {
   }
 };
 
-// =========================================================================
-// MAPEAMENTO COMPLETO DE ROTAS (Cobre todas as variações com/sem barra do axios)
-// =========================================================================
 settingsRoutes.get('/', authMiddleware as any, handleGetSettings);
 settingsRoutes.get('/settings', authMiddleware as any, handleGetSettings);
 
